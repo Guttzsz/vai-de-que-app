@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vai de Quê?</title>
+  <title>Vamo de Quê?</title>
   <meta name="description" content="Conselheiro de decisão pré-deslocamento para escolher o melhor modal em Aracaju.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
     <section id="tela-onboarding" class="tela active" aria-label="Onboarding e perfil">
       <div class="brand-panel">
         <p class="eyebrow">Conselheiro de deslocamento</p>
-        <h1>Vai de Quê<span>?</span></h1>
+        <h1>Vamo de Quê<span>?</span></h1>
         <p class="intro">Escolha com base no seu perfil, no momento da cidade e no que mais importa hoje.</p>
         <button class="btn-primary" type="button" data-action="iniciar">Começar</button>
       </div>
@@ -30,20 +30,20 @@
         </div>
 
         <fieldset>
-          <legend>Prioridade</legend>
-          <div class="priority-grid" role="radiogroup" aria-label="Escolha sua prioridade">
+          <legend>O que importa na viagem?</legend>
+          <div class="priority-grid" aria-label="Escolha uma ou mais prioridades">
             <label class="choice-card">
-              <input type="radio" name="prioridade" value="economia" checked>
+              <input type="checkbox" name="prioridades" value="economia" checked>
               <span>Economia</span>
               <small>Preço em primeiro lugar</small>
             </label>
             <label class="choice-card">
-              <input type="radio" name="prioridade" value="tempo">
+              <input type="checkbox" name="prioridades" value="tempo">
               <span>Tempo</span>
               <small>Chegar mais rápido</small>
             </label>
             <label class="choice-card">
-              <input type="radio" name="prioridade" value="conforto">
+              <input type="checkbox" name="prioridades" value="conforto">
               <span>Conforto</span>
               <small>Mais segurança e comodidade</small>
             </label>
@@ -61,7 +61,6 @@
             <label><input type="checkbox" name="modais" value="carro" checked> Carro próprio</label>
             <label><input type="checkbox" name="modais" value="uber" checked> Uber/99</label>
             <label><input type="checkbox" name="modais" value="onibus" checked> Ônibus</label>
-            <label><input type="checkbox" name="modais" value="metro"> Metrô</label>
             <label><input type="checkbox" name="modais" value="bike"> Bike</label>
             <label><input type="checkbox" name="modais" value="ape"> A pé</label>
           </div>
@@ -97,7 +96,7 @@
           <option value="Luzia"></option>
           <option value="Grageru"></option>
         </datalist>
-        <button class="btn-primary wide" type="button" data-action="recomendar">Vai de quê?</button>
+        <button class="btn-primary wide" type="button" data-action="recomendar">Vamo de quê?</button>
       </div>
 
       <div class="snapshot-grid" aria-label="Snapshot do momento">
@@ -134,7 +133,7 @@
 
       <div class="section-title">
         <h3>Comparar modais</h3>
-        <button class="btn-secondary" type="button" data-action="perfil-rapido">Mudar perfil rápido</button>
+        <button class="btn-secondary" type="button" data-action="perfil-rapido">Alternar prioridades</button>
       </div>
       <div id="lista-modais" class="comparison-list"></div>
 
