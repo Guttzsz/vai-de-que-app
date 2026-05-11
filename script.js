@@ -107,10 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function bindEvents() {
-  document.querySelector("[data-action='iniciar']").addEventListener("click", () => {
-    document.getElementById("nome").focus();
-  });
-
   document.getElementById("perfil-form").addEventListener("submit", salvarPerfil);
   document.querySelector("[data-action='editar-perfil']").addEventListener("click", () => navegarPara("tela-onboarding"));
   document.querySelector("[data-action='voltar-home']").addEventListener("click", () => navegarPara("tela-home"));
