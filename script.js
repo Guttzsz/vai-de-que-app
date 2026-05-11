@@ -66,6 +66,15 @@ const MODAIS = {
     carbono: "Baixa",
     acessivel: true
   },
+  metro: {
+    nome: "Metrô",
+    icon: "train-front",
+    tempo: 28,
+    custo: 4.5,
+    conforto: 3,
+    carbono: "Baixa",
+    acessivel: true
+  },
   bike: {
     nome: "Bike",
     icon: "bike",
@@ -97,8 +106,7 @@ const state = {
 };
 
 window.APP_STATE = state;
-const STORAGE_KEY = "vamoDeQuePerfil";
-const LEGACY_STORAGE_KEY = "vaiDeQuePerfil";
+const STORAGE_KEY = "vaiDeQuePerfil";
 
 document.addEventListener("DOMContentLoaded", () => {
   bindEvents();
@@ -127,17 +135,14 @@ function bindEvents() {
 }
 
 function carregarPerfil() {
-  const salvo = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+  const salvo = localStorage.getItem(STORAGE_KEY);
   if (!salvo) return;
 
   state.perfil = JSON.parse(salvo);
-  state.perfil.prioridades = normalizarPrioridades(state.perfil);
   state.perfil.modais = (state.perfil.modais || ["uber", "onibus"]).filter((modal) => MODAIS[modal]);
   document.getElementById("nome").value = state.perfil.nome || "";
   document.getElementById("mobilidade").checked = Boolean(state.perfil.mobilidadeReduzida);
-  document.querySelectorAll("[name='prioridades']").forEach((input) => {
-    input.checked = state.perfil.prioridades.includes(input.value);
-  });
+  document.querySelector(`[name="prioridade"][value="${state.perfil.prioridade || "economia"}"]`).checked = true;
   document.querySelectorAll("[name='modais']").forEach((input) => {
     input.checked = state.perfil.modais.includes(input.value);
   });
@@ -151,13 +156,12 @@ function salvarPerfil(event) {
 
   state.perfil = {
     nome: String(form.get("nome") || "").trim(),
-    prioridades: normalizarPrioridades({ prioridades: form.getAll("prioridades") }),
+    prioridade: form.get("prioridade") || "economia",
     mobilidadeReduzida: Boolean(form.get("mobilidade")),
     modais: (modais.length ? modais : ["uber", "onibus"]).filter((modal) => MODAIS[modal])
   };
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.perfil));
-  localStorage.removeItem(LEGACY_STORAGE_KEY);
   aplicarMobilidade();
   navegarPara("tela-home");
 }
@@ -185,8 +189,7 @@ function gerarRecomendacao() {
 }
 
 function escolherModal() {
-  const perfil = state.perfil || { prioridades: ["economia"], modais: ["uber", "onibus"], mobilidadeReduzida: false };
-  perfil.prioridades = normalizarPrioridades(perfil);
+  const perfil = state.perfil || { prioridade: "economia", modais: ["uber", "onibus"], mobilidadeReduzida: false };
   const disponiveis = perfil.modais.filter((modal) => MODAIS[modal]);
   const candidatos = disponiveis.length ? disponiveis : ["uber", "onibus"];
 
@@ -202,16 +205,11 @@ function scoreModal(modal, perfil) {
   const custoScore = item.custo * 1.8;
   const tempoScore = item.tempo * 1.4;
   const confortoScore = (5 - item.conforto) * 10;
-  const prioridades = normalizarPrioridades(perfil);
 
   if (perfil.mobilidadeReduzida) return tempoScore + confortoScore - (item.acessivel ? 12 : -40);
-  const pesos = {
-    economia: prioridades.includes("economia") ? 1 : 0.2,
-    tempo: prioridades.includes("tempo") ? 1 : 0.2,
-    conforto: prioridades.includes("conforto") ? 1 : 0.2
-  };
-
-  return (custoScore * pesos.economia) + (tempoScore * pesos.tempo) + (confortoScore * pesos.conforto);
+  if (perfil.prioridade === "tempo") return tempoScore + custoScore * 0.25 + confortoScore * 0.4;
+  if (perfil.prioridade === "conforto") return confortoScore + tempoScore * 0.35 + custoScore * 0.15;
+  return custoScore + tempoScore * 0.35 + confortoScore * 0.25;
 }
 
 function renderRecomendacao() {
@@ -237,13 +235,9 @@ function renderRecomendacao() {
 
 function textoPrioridade() {
   if (state.perfil?.mobilidadeReduzida) return "acessibilidade, conforto e previsibilidade";
-  const prioridades = normalizarPrioridades(state.perfil);
-  const textos = {
-    economia: "preço baixo",
-    tempo: "tempo de chegada",
-    conforto: "conforto e segurança"
-  };
-  return prioridades.map((prioridade) => textos[prioridade]).join(", ");
+  if (state.perfil?.prioridade === "tempo") return "tempo de chegada e confiabilidade";
+  if (state.perfil?.prioridade === "conforto") return "conforto, segurança e comodidade";
+  return "preço baixo e tempo aceitável";
 }
 
 function renderComparacao() {
@@ -273,20 +267,15 @@ function renderComparacao() {
 }
 
 function alternarPerfilRapido() {
-  state.perfil = state.perfil || { nome: "", prioridades: ["economia"], modais: ["uber", "onibus"], mobilidadeReduzida: false };
-  const atuais = normalizarPrioridades(state.perfil);
-  state.perfil.prioridades = atuais.length === 3 ? ["economia"] : ["economia", "tempo", "conforto"];
+  const ordem = ["economia", "tempo", "conforto"];
+  const atual = state.perfil?.prioridade || "economia";
+  const proximo = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
+
+  state.perfil = state.perfil || { nome: "", modais: ["uber", "onibus"], mobilidadeReduzida: false };
+  state.perfil.prioridade = proximo;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.perfil));
-  localStorage.removeItem(LEGACY_STORAGE_KEY);
   state.modalRecomendado = escolherModal();
   renderRecomendacao();
-}
-
-function normalizarPrioridades(perfil) {
-  const validas = ["economia", "tempo", "conforto"];
-  const origem = Array.isArray(perfil?.prioridades) ? perfil.prioridades : [perfil?.prioridade || "economia"];
-  const prioridades = origem.filter((item, index) => validas.includes(item) && origem.indexOf(item) === index);
-  return prioridades.length ? prioridades : ["economia"];
 }
 
 function abrirMapa(modalSelecionado) {
