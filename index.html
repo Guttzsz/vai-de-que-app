@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vai de Quê?</title>
+  <meta name="description" content="Conselheiro de decisão pré-deslocamento para escolher o melhor modal em Aracaju.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main id="app" class="app-shell">
+    <section id="tela-onboarding" class="tela active" aria-label="Onboarding e perfil">
+      <div class="brand-panel">
+        <p class="eyebrow">Conselheiro de deslocamento</p>
+        <h1>Vai de Quê<span>?</span></h1>
+        <p class="intro">Escolha com base no seu perfil, no momento da cidade e no que mais importa hoje.</p>
+        <button class="btn-primary" type="button" data-action="iniciar">Começar</button>
+      </div>
+
+      <form id="perfil-form" class="profile-form" aria-label="Formulário de perfil">
+        <div class="form-row">
+          <label for="nome">Seu nome</label>
+          <input id="nome" name="nome" type="text" placeholder="Ex: Ana" autocomplete="given-name">
+        </div>
+
+        <fieldset>
+          <legend>Prioridade</legend>
+          <div class="priority-grid" role="radiogroup" aria-label="Escolha sua prioridade">
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="economia" checked>
+              <span>Economia</span>
+              <small>Preço em primeiro lugar</small>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="tempo">
+              <span>Tempo</span>
+              <small>Chegar mais rápido</small>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="conforto">
+              <span>Conforto</span>
+              <small>Mais segurança e comodidade</small>
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="check-line">
+          <input id="mobilidade" name="mobilidade" type="checkbox">
+          <span>Tenho mobilidade reduzida ou preciso de rota acessível</span>
+        </label>
+
+        <fieldset>
+          <legend>Modais que você costuma usar</legend>
+          <div class="modal-grid">
+            <label><input type="checkbox" name="modais" value="carro" checked> Carro próprio</label>
+            <label><input type="checkbox" name="modais" value="uber" checked> Uber/99</label>
+            <label><input type="checkbox" name="modais" value="onibus" checked> Ônibus</label>
+            <label><input type="checkbox" name="modais" value="metro"> Metrô</label>
+            <label><input type="checkbox" name="modais" value="bike"> Bike</label>
+            <label><input type="checkbox" name="modais" value="ape"> A pé</label>
+          </div>
+        </fieldset>
+
+        <button class="btn-primary wide" type="submit">Salvar perfil</button>
+      </form>
+    </section>
+
+    <section id="tela-home" class="tela" aria-label="Busca de destino">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Agora em Aracaju</p>
+          <h2>Para onde você vai?</h2>
+        </div>
+        <button class="icon-btn" type="button" data-action="editar-perfil" aria-label="Editar perfil">
+          <i data-lucide="user-round"></i>
+        </button>
+      </header>
+
+      <div class="route-box">
+        <label for="origem">Origem</label>
+        <input id="origem" type="text" value="Localização atual - Atalaia" readonly>
+        <label for="destino">Destino</label>
+        <input id="destino" type="text" list="bairros" placeholder="Digite um bairro de Aracaju">
+        <datalist id="bairros">
+          <option value="Centro"></option>
+          <option value="Atalaia"></option>
+          <option value="Coroa do Meio"></option>
+          <option value="Farolândia"></option>
+          <option value="Jardins"></option>
+          <option value="Salgado Filho"></option>
+          <option value="Luzia"></option>
+          <option value="Grageru"></option>
+        </datalist>
+        <button class="btn-primary wide" type="button" data-action="recomendar">Vai de quê?</button>
+      </div>
+
+      <div class="snapshot-grid" aria-label="Snapshot do momento">
+        <article>
+          <i data-lucide="cloud-sun"></i>
+          <strong>28°C</strong>
+          <span>Clima aberto</span>
+        </article>
+        <article>
+          <i data-lucide="traffic-cone"></i>
+          <strong>Moderado</strong>
+          <span>Trânsito na Beira Mar</span>
+        </article>
+        <article>
+          <i data-lucide="clock-3"></i>
+          <strong>18:20</strong>
+          <span>Horário de pico leve</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="tela-recomendacao" class="tela" aria-label="Recomendação de modal">
+      <header class="topbar">
+        <button class="icon-btn" type="button" data-action="voltar-home" aria-label="Voltar">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <div>
+          <p class="eyebrow">Recomendação</p>
+          <h2>Melhor escolha agora</h2>
+        </div>
+      </header>
+
+      <article id="card-destaque" class="recommendation-card" aria-live="polite"></article>
+
+      <div class="section-title">
+        <h3>Comparar modais</h3>
+        <button class="btn-secondary" type="button" data-action="perfil-rapido">Mudar perfil rápido</button>
+      </div>
+      <div id="lista-modais" class="comparison-list"></div>
+
+      <button class="btn-accent wide map-cta" type="button" data-action="abrir-mapa">
+        <i data-lucide="map"></i>
+        Ver no Mapa
+      </button>
+    </section>
+
+    <section id="tela-mapa" class="tela" aria-label="Mapa de localização">
+      <header class="topbar map-header">
+        <button class="icon-btn" type="button" data-action="voltar-recomendacao" aria-label="Voltar">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <div>
+          <p class="eyebrow">Mapa interativo</p>
+          <h2>Onde está seu transporte?</h2>
+        </div>
+      </header>
+
+      <div class="mapa-toggle" role="group" aria-label="Selecionar modal">
+        <button id="btn-uber" class="toggle-btn ativo" type="button" data-modal="uber" aria-pressed="true">
+          <i data-lucide="car"></i>
+          Uber
+        </button>
+        <button id="btn-onibus" class="toggle-btn" type="button" data-modal="onibus" aria-pressed="false">
+          <i data-lucide="bus"></i>
+          Ônibus
+        </button>
+      </div>
+
+      <div id="mapa-container" aria-label="Mapa interativo de Aracaju"></div>
+
+      <div class="mapa-legenda" aria-label="Legenda do mapa">
+        <span><b class="dot user"></b>Você</span>
+        <span><b class="dot uber"></b>Uber disponível</span>
+        <span><b class="dot bus"></b>Ônibus</span>
+        <span><b class="dot terminal"></b>Terminal</span>
+      </div>
+
+      <div class="near-card" id="card-proximo" aria-live="polite">
+        <div class="card-icon">🚗</div>
+        <div class="card-info">
+          <strong id="label-proximo">Uber mais próximo</strong>
+          <span id="eta-proximo">Chegada estimada: 4 min</span>
+        </div>
+        <button class="btn-primary compact" type="button" data-action="chamar">Chamar</button>
+      </div>
+
+      <div class="bus-occupancy-panel hidden" id="lotacao-onibus" aria-live="polite">
+        <div class="section-title compact-title">
+          <h3>Lotação dos ônibus próximos</h3>
+          <span>mockado</span>
+        </div>
+        <div id="lista-lotacao" class="occupancy-list"></div>
+      </div>
+
+      <p class="mock-note">Posições simuladas para demonstração. Futuro: Uber API, GTFS/SMTT, OpenWeatherMap e Google Traffic Layer.</p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</body>
+</html>
