@@ -136,17 +136,6 @@
 
       <article id="card-destaque" class="recommendation-card" aria-live="polite"></article>
 
-      <div class="uber-action-card" id="uber-action-card">
-        <div>
-          <strong>Quer ir de Uber/99?</strong>
-          <span>Simule uma chamada direta com destino preenchido.</span>
-        </div>
-        <button class="btn-primary compact" type="button" data-action="chamar-uber">
-          <i data-lucide="car"></i>
-          Chamar Uber/99
-        </button>
-      </div>
-
       <div class="section-title">
         <h3>Comparar modais</h3>
         <button class="btn-secondary" type="button" data-action="perfil-rapido">Mudar perfil rápido</button>
@@ -171,9 +160,9 @@
       </header>
 
       <div class="mapa-toggle" role="group" aria-label="Selecionar modal">
-        <button id="btn-jet" class="toggle-btn ativo" type="button" data-modal="jet" aria-pressed="true">
-          <i data-lucide="zap"></i>
-          Jet
+        <button id="btn-uber" class="toggle-btn ativo" type="button" data-modal="uber" aria-pressed="true">
+          <i data-lucide="car"></i>
+          Uber
         </button>
         <button id="btn-onibus" class="toggle-btn" type="button" data-modal="onibus" aria-pressed="false">
           <i data-lucide="bus"></i>
@@ -185,16 +174,16 @@
 
       <div class="mapa-legenda" aria-label="Legenda do mapa">
         <span><b class="dot user"></b>Você</span>
-        <span><b class="dot jet"></b>Patinete Jet</span>
+        <span><b class="dot uber"></b>Uber disponível</span>
         <span><b class="dot bus"></b>Ônibus</span>
         <span><b class="dot terminal"></b>Terminal</span>
       </div>
 
       <div class="near-card" id="card-proximo" aria-live="polite">
-        <div class="card-icon">🛴</div>
+        <div class="card-icon">🚗</div>
         <div class="card-info">
-          <strong id="label-proximo">Jet mais próxima</strong>
-          <span id="eta-proximo">Patinete disponível: 2 min a pé</span>
+          <strong id="label-proximo">Uber mais próximo</strong>
+          <span id="eta-proximo">Chegada estimada: 4 min</span>
         </div>
         <button class="btn-primary compact" type="button" data-action="chamar">Chamar</button>
       </div>
