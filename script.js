@@ -66,6 +66,16 @@ const MODAIS = {
     carbono: "Baixa",
     acessivel: true
   },
+  jet: {
+    nome: "Jet",
+    icon: "zap",
+    tempo: 22,
+    custo: 7.9,
+    conforto: 3,
+    carbono: "Zero",
+    acessivel: false,
+    contexto: "mais disponível na Orla, Atalaia e Coroa do Meio"
+  },
   bike: {
     nome: "Bike",
     icon: "bike",
@@ -130,6 +140,7 @@ function carregarPerfil() {
   state.perfil.modais = (state.perfil.modais || ["uber", "onibus"]).filter((modal) => MODAIS[modal]);
   document.getElementById("nome").value = state.perfil.nome || "";
   document.getElementById("mobilidade").checked = Boolean(state.perfil.mobilidadeReduzida);
+  document.getElementById("orcamento-mensal").value = state.perfil.orcamentoMensal || "";
   document.querySelectorAll("[name='prioridades']").forEach((input) => {
     input.checked = state.perfil.prioridades.includes(input.value);
   });
@@ -147,8 +158,9 @@ function salvarPerfil(event) {
   state.perfil = {
     nome: String(form.get("nome") || "").trim(),
     prioridades: normalizarPrioridades({ prioridades: form.getAll("prioridades") }),
+    orcamentoMensal: Number(form.get("orcamentoMensal")) || 0,
     mobilidadeReduzida: Boolean(form.get("mobilidade")),
-    modais: (modais.length ? modais : ["uber", "onibus"]).filter((modal) => MODAIS[modal])
+    modais: (modais.length ? modais : ["uber", "onibus", "jet"]).filter((modal) => MODAIS[modal])
   };
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.perfil));
@@ -179,7 +191,7 @@ function gerarRecomendacao() {
 }
 
 function escolherModal() {
-  const perfil = state.perfil || { prioridades: ["economia"], modais: ["uber", "onibus"], mobilidadeReduzida: false };
+  const perfil = state.perfil || { prioridades: ["economia"], modais: ["uber", "onibus", "jet"], mobilidadeReduzida: false };
   perfil.prioridades = normalizarPrioridades(perfil);
   const disponiveis = perfil.modais.filter((modal) => MODAIS[modal]);
   const candidatos = disponiveis.length ? disponiveis : ["uber", "onibus"];
@@ -197,6 +209,12 @@ function scoreModal(modal, perfil) {
   const tempoScore = item.tempo * 1.4;
   const confortoScore = (5 - item.conforto) * 10;
   const prioridades = normalizarPrioridades(perfil);
+  const orcamentoMensal = Number(perfil.orcamentoMensal) || 0;
+  const custoMensalEstimado = item.custo * 22;
+  const estouroOrcamento = orcamentoMensal && custoMensalEstimado > orcamentoMensal
+    ? (custoMensalEstimado - orcamentoMensal) * 0.35
+    : 0;
+  const bonusLitoral = modal === "jet" && destinoEhLitoraneo(state.destino) ? -10 : 0;
 
   if (perfil.mobilidadeReduzida) return tempoScore + confortoScore - (item.acessivel ? 12 : -40);
   const pesos = {
@@ -205,7 +223,7 @@ function scoreModal(modal, perfil) {
     conforto: prioridades.includes("conforto") ? 1 : 0.2
   };
 
-  return (custoScore * pesos.economia) + (tempoScore * pesos.tempo) + (confortoScore * pesos.conforto);
+  return (custoScore * pesos.economia) + (tempoScore * pesos.tempo) + (confortoScore * pesos.conforto) + estouroOrcamento + bonusLitoral;
 }
 
 function renderRecomendacao() {
@@ -216,7 +234,7 @@ function renderRecomendacao() {
   card.innerHTML = `
     <span class="badge">Melhor para seu perfil</span>
     <h3>${modal.nome}</h3>
-    <p>${perfilNome}para ir de Atalaia a ${state.destino}, ${modal.nome.toLowerCase()} equilibra melhor ${textoPrioridade()} com o momento atual: trânsito moderado, clima aberto e custo estimado de ${formatMoney(modal.custo)}.</p>
+    <p>${perfilNome}para ir de Atalaia a ${state.destino}, ${modal.nome.toLowerCase()} equilibra melhor ${textoPrioridade()} com o momento atual: trânsito moderado, clima aberto e custo estimado de ${formatMoney(modal.custo)}.${textoContextoModal(state.modalRecomendado)}</p>
     <div class="recommendation-meta">
       <span>${modal.tempo} min</span>
       <span>${formatMoney(modal.custo)}</span>
@@ -257,17 +275,35 @@ function renderComparacao() {
         <div class="metrics">
           <span>${modal.tempo} min</span>
           <span>${formatMoney(modal.custo)}</span>
+          ${state.perfil?.orcamentoMensal ? `<span>${formatMoney(modal.custo * 22)}/mês estimado</span>` : ""}
           <span>${"★".repeat(modal.conforto)}${"☆".repeat(5 - modal.conforto)}</span>
           <span>CO2 ${modal.carbono}</span>
           ${id === "onibus" ? `<span>${resumoLotacaoOnibus()}</span>` : ""}
+          ${id === "jet" ? `<span>Mais comum no litoral</span>` : ""}
         </div>
       </div>
     </article>
   `).join("");
 }
 
+function textoContextoModal(modal) {
+  if (modal === "jet") {
+    return " A Jet costuma funcionar melhor em trechos curtos e áreas litorâneas como Atalaia, Orla e Coroa do Meio.";
+  }
+  if (state.perfil?.orcamentoMensal) {
+    return ` Seu limite mensal informado foi ${formatMoney(state.perfil.orcamentoMensal)}.`;
+  }
+  return "";
+}
+
+function destinoEhLitoraneo(destino) {
+  return ["atalaia", "coroa do meio", "orla", "farolândia"].some((bairro) =>
+    String(destino || "").toLowerCase().includes(bairro)
+  );
+}
+
 function alternarPerfilRapido() {
-  state.perfil = state.perfil || { nome: "", prioridades: ["economia"], modais: ["uber", "onibus"], mobilidadeReduzida: false };
+  state.perfil = state.perfil || { nome: "", prioridades: ["economia"], modais: ["uber", "onibus", "jet"], mobilidadeReduzida: false };
   const atuais = normalizarPrioridades(state.perfil);
   state.perfil.prioridades = atuais.length === 3 ? ["economia"] : ["economia", "tempo", "conforto"];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.perfil));
