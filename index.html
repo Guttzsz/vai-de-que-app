@@ -28,6 +28,11 @@
           <input id="nome" name="nome" type="text" placeholder="Ex: Ana" autocomplete="given-name">
         </div>
 
+        <div class="form-row">
+          <label for="orcamento-mensal">Quanto você quer gastar no mês?</label>
+          <input id="orcamento-mensal" name="orcamentoMensal" type="number" min="0" step="10" inputmode="decimal" placeholder="Ex: 180">
+        </div>
+
         <fieldset>
           <legend>Prioridade</legend>
           <div class="priority-grid" aria-label="Escolha uma ou mais prioridades">
@@ -60,6 +65,7 @@
             <label><input type="checkbox" name="modais" value="carro" checked> Carro próprio</label>
             <label><input type="checkbox" name="modais" value="uber" checked> Uber/99</label>
             <label><input type="checkbox" name="modais" value="onibus" checked> Ônibus</label>
+            <label><input type="checkbox" name="modais" value="jet" checked> Jet</label>
             <label><input type="checkbox" name="modais" value="bike"> Bike</label>
             <label><input type="checkbox" name="modais" value="ape"> A pé</label>
           </div>
