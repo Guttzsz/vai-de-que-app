@@ -385,36 +385,6 @@ input[type="radio"] {
   font-weight: 800;
 }
 
-.uber-action-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 14px;
-  padding: 14px;
-  background: var(--surface);
-  border: 1px solid rgba(255, 107, 53, 0.24);
-  border-radius: 8px;
-  box-shadow: 0 10px 28px rgba(31, 45, 43, 0.08);
-}
-
-.uber-action-card div {
-  display: grid;
-  gap: 3px;
-}
-
-.uber-action-card span {
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-.uber-action-card button {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  white-space: nowrap;
-}
-
 .section-title {
   display: flex;
   align-items: center;
@@ -547,8 +517,8 @@ input[type="radio"] {
   background: var(--primary);
 }
 
-.dot.jet {
-  background: var(--primary);
+.dot.uber {
+  background: var(--accent);
 }
 
 .dot.bus {
@@ -703,10 +673,6 @@ input[type="radio"] {
   background: var(--accent);
 }
 
-.vehicle-pin.jet {
-  background: var(--primary);
-}
-
 .vehicle-pin.onibus {
   background: #0984e3;
 }
@@ -780,17 +746,6 @@ body.reduced-mobility .near-card {
   }
 }
 
-@media (max-width: 520px) {
-  .uber-action-card {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .uber-action-card button {
-    width: 100%;
-    justify-content: center;
-  }
-}
 
 @media (min-width: 980px) {
   .app-shell {
