@@ -20,6 +20,12 @@ const MOCK_VEHICLES = {
     { lat: -10.9490, lng: -37.0710, label: "Uber - 6 min", id: "uber-02" },
     { lat: -10.9445, lng: -37.0780, label: "Uber - 8 min", id: "uber-03" }
   ],
+  jet: [
+    { lat: -10.9504, lng: -37.0748, label: "Jet - Orla de Atalaia", id: "jet-01", eta: "2 min a pé", bateria: "82%", tipo: "Patinete elétrico" },
+    { lat: -10.9471, lng: -37.0715, label: "Jet - Passarela do Caranguejo", id: "jet-02", eta: "4 min a pé", bateria: "68%", tipo: "Patinete elétrico" },
+    { lat: -10.9412, lng: -37.0598, label: "Jet - Coroa do Meio", id: "jet-03", eta: "7 min a pé", bateria: "74%", tipo: "Patinete elétrico" },
+    { lat: -10.9532, lng: -37.0694, label: "Jet - Lagos da Orla", id: "jet-04", eta: "9 min a pé", bateria: "59%", tipo: "Bicicleta elétrica" }
+  ],
   onibus: [
     { lat: -10.9500, lng: -37.0680, label: "Ônibus 004 - Linha Centro/Atalaia", id: "bus-01", eta: "3 min", lotacao: 88, lotacaoStatus: "Lotado", lotacaoNivel: "lotado" },
     { lat: -10.9420, lng: -37.0800, label: "Ônibus 052 - Linha Salgado Filho", id: "bus-02", eta: "11 min", lotacao: 32, lotacaoStatus: "Tranquilo", lotacaoNivel: "tranquilo" },
@@ -125,6 +131,7 @@ function bindEvents() {
   document.querySelector("[data-action='recomendar']").addEventListener("click", gerarRecomendacao);
   document.querySelector("[data-action='abrir-mapa']").addEventListener("click", () => abrirMapa(state.modalRecomendado));
   document.querySelector("[data-action='chamar']").addEventListener("click", chamarTransporte);
+  document.querySelector("[data-action='chamar-uber']").addEventListener("click", simularChamadaUber99);
 
   document.querySelectorAll(".toggle-btn").forEach((button) => {
     button.addEventListener("click", () => trocarModal(button.dataset.modal));
@@ -319,7 +326,7 @@ function normalizarPrioridades(perfil) {
 }
 
 function abrirMapa(modalSelecionado) {
-  const modalMapa = modalSelecionado === "onibus" ? "onibus" : "uber";
+  const modalMapa = modalSelecionado === "onibus" ? "onibus" : "jet";
   state.modalRecomendado = modalMapa;
   navegarPara("tela-mapa");
 
@@ -365,9 +372,9 @@ function renderUserMarkerLeaflet() {
 
 function renderVehicleMarkersLeaflet(modal) {
   state.vehicleLayer.clearLayers();
-  const veiculos = MOCK_VEHICLES[modal] || MOCK_VEHICLES.uber;
-  const color = modal === "uber" ? "#ff6b35" : "#0984e3";
-  const iconName = modal === "uber" ? "car" : "bus";
+  const veiculos = MOCK_VEHICLES[modal] || MOCK_VEHICLES.jet;
+  const color = modal === "jet" ? "#00b894" : "#0984e3";
+  const iconName = modal === "jet" ? "zap" : "bus";
 
   veiculos.forEach((veiculo) => {
     L.marker([veiculo.lat, veiculo.lng], {
@@ -429,30 +436,38 @@ function trocarModal(modal) {
 }
 
 function atualizarCardProximo(modal) {
-  const veiculos = MOCK_VEHICLES[modal] || MOCK_VEHICLES.uber;
+  const veiculos = MOCK_VEHICLES[modal] || MOCK_VEHICLES.jet;
   const proximo = veiculos[0];
   const eta = proximo.eta || proximo.label.split("-")[1]?.trim() || "a caminho";
 
-  document.querySelector("#card-proximo .card-icon").textContent = modal === "uber" ? "🚗" : "🚌";
-  document.getElementById("label-proximo").textContent = modal === "uber" ? "Uber mais próximo" : proximo.label.split("-")[0].trim();
+  document.querySelector("#card-proximo .card-icon").textContent = modal === "jet" ? "🛴" : "🚌";
+  document.getElementById("label-proximo").textContent = modal === "jet" ? proximo.label : proximo.label.split("-")[0].trim();
   document.getElementById("eta-proximo").textContent =
     modal === "onibus"
       ? `Chegada estimada: ${eta} | Lotação: ${proximo.lotacaoStatus} (${proximo.lotacao}%)`
-      : `Chegada estimada: ${eta}`;
+      : `${proximo.tipo} disponível | ${eta} | Bateria ${proximo.bateria}`;
 }
 
 function chamarTransporte() {
-  alert("Em breve: integração com Uber e app de ônibus de Aracaju.");
+  alert("Simulação: abrir app da Jet com o equipamento selecionado na Orla/Coroa do Meio.");
 }
 
 function popupVeiculo(modal, veiculo) {
   const eta = veiculo.eta || veiculo.label.split("-")[1]?.trim() || "a caminho";
-  const nome = modal === "uber" ? "Motorista disponível" : veiculo.label.split("-")[0].trim();
-  const detalhe = modal === "uber" ? "Carro parceiro simulado" : veiculo.label.split("-")[1]?.trim() || "Linha local";
+  const nome = modal === "jet" ? veiculo.label : veiculo.label.split("-")[0].trim();
+  const detalhe = modal === "jet" ? `${veiculo.tipo} | Bateria ${veiculo.bateria}` : veiculo.label.split("-")[1]?.trim() || "Linha local";
   const lotacao = modal === "onibus"
     ? `<br>Lotação: <b>${veiculo.lotacaoStatus} (${veiculo.lotacao}%)</b>`
     : "";
-  return `<strong>${nome}</strong><br>Chegada estimada: <b>${eta}</b>${lotacao}<br><small>${detalhe}</small>`;
+  const jet = modal === "jet" ? `<br>Distância a pé: <b>${eta}</b>` : `<br>Chegada estimada: <b>${eta}</b>`;
+  return `<strong>${nome}</strong>${jet}${lotacao}<br><small>${detalhe}</small>`;
+}
+
+function simularChamadaUber99() {
+  const destino = encodeURIComponent(state.destino || "Jardins, Aracaju");
+  const uberUrl = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${destino}%2C%20Aracaju`;
+  alert("Simulação: abrindo Uber/99 com origem atual e destino preenchido. Em produção, aqui entraria o deep link do app.");
+  window.open(uberUrl, "_blank", "noopener");
 }
 
 function renderLotacaoOnibus(modal) {
